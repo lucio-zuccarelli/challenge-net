@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const BASE_URL = 'http://devserver01.intuit.ar/test/api'
+const BASE_URL = 'http://localhost:5000'
 
 export const turnosApi = {
   getAll:           ()          => axios.get(`${BASE_URL}/turnos`),

@@ -25,7 +25,7 @@
             <span :class="['badge', `badge-${turno.estado?.toLowerCase()}`]">{{ turno.estado }}</span>
           </td>
           <td>{{ turno.motivo }}</td>
-          <td>
+          <td style="display: flex; align-items: center">
             <router-link :to="`/turnos/${turno.id}`" class="btn-ver">Ver</router-link>
             <button class="btn-danger" style="margin-left: 8px" @click="cancelar(turno.id)">Cancelar</button>
           </td>
@@ -93,6 +93,7 @@ export default {
   border-radius: 4px;
   font-size: 13px;
   text-decoration: none;
+  margin-left: 8px;
 }
 .btn-ver:hover { background: #1558b0; }
 </style>

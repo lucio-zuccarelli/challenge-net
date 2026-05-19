@@ -37,18 +37,23 @@
 
 **Rama:** `fix/bugs-criticos-capa-servicios`
 
-| # | ID | Área | Tarea | Esfuerzo |
-|---|----|------|-------|----------|
-| 1 | E2 | Backend | Crear capa de servicios (`Services/`). Extraer lógica de negocio de controllers a `TurnoService` y `PacienteService`. Los controllers pasan a ser delegadores. | A |
-| 2 | B2 | Backend | Reemplazar `DateTime.Now` por `DateTime.UtcNow` en `TurnosController.cs:75` y `DateTimeExtensions.cs:7` | MB |
-| 3 | B3 | Backend | Cambiar `[HttpGet("cancelar/{id}")]` por `[HttpPost("{id}/cancelar")]` y actualizar la llamada en `api.js` | MB |
-| 4 | B5 | Backend | Corregir `MarcarAusencia`: reemplazar `IsWithinCancellationWindow()` por validación de que el turno ya ocurrió y está dentro de las 24hs posteriores | MB |
-| 5 | E6 | Frontend | Invertir orden de rutas en `router/index.js`: `/nuevo` debe ir antes que `/:id` | MB |
-| 6 | F2 | Frontend | Agregar clase CSS al `<router-link>` "Ver" en `TurnosList.vue:29` para igualarlo visualmente al botón "Cancelar" | MB |
-| 7 | F3 | Frontend | Aplicar estilo de botón al `<router-link>` "← Volver a turnos" en `TurnoDetalle.vue:3` | MB |
-| 8 | F4 | Frontend | `TurnosList.vue`: agregar confirmación antes de cancelar, `try/catch`, feedback de resultado y refresco de lista | B |
-| 9 | F6 | Frontend | `TurnoDetalle.vue`: agregar confirmación de usuario antes de ejecutar `cancelar()`, `marcarAusencia()` y `cambiarEstado()`. Agregar `try/catch` con mensaje de resultado en cada acción | B |
-| 10 | B6-FE | Frontend | `PacientesList.vue`: agregar confirmación antes de eliminar un paciente | MB |
+| # | ID | Área | Tarea | Esfuerzo | Estado |
+|---|----|------|-------|----------|--------|
+| 1 | E2 | Backend | Crear capa de servicios (`Services/`). Extraer lógica de negocio de controllers a `TurnoService` y `PacienteService`. Los controllers pasan a ser delegadores. | A | ✓ |
+| 2 | B2 | Backend | Reemplazar `DateTime.Now` por `DateTime.UtcNow` en `TurnosController.cs:75` y `DateTimeExtensions.cs:7` | MB | ✓ |
+| 3 | B3 | Backend | Cambiar `[HttpGet("cancelar/{id}")]` por `[HttpPost("{id}/cancelar")]` y actualizar la llamada en `api.js` | MB | ✓ |
+| 4 | B5 | Backend | Corregir `MarcarAusencia`: reemplazar `IsWithinCancellationWindow()` por validación de que el turno ya ocurrió y está dentro de las 24hs posteriores | MB | ✓ |
+| 5 | E6 | Frontend | Invertir orden de rutas en `router/index.js`: `/nuevo` debe ir antes que `/:id` | MB | ✓ |
+| 6 | F2 | Frontend | Agregar clase CSS al `<router-link>` "Ver" en `TurnosList.vue:29` para igualarlo visualmente al botón "Cancelar" | MB | ✓ |
+| 7 | F3 | Frontend | Aplicar estilo de botón al `<router-link>` "← Volver a turnos" en `TurnoDetalle.vue:3` | MB | ✓ |
+| 8 | F4 | Frontend | `TurnosList.vue`: agregar confirmación antes de cancelar, `try/catch`, feedback de resultado y refresco de lista | B | ✓ |
+| 9 | F6 | Frontend | `TurnoDetalle.vue`: agregar confirmación de usuario antes de ejecutar `cancelar()`, `marcarAusencia()` y `cambiarEstado()`. Agregar `try/catch` con mensaje de resultado en cada acción | B | ✓ |
+| 10 | B6-FE | Frontend | `PacientesList.vue`: agregar confirmación antes de eliminar un paciente | MB | ✓ |
+| 11 | B12 | Backend | `TurnoService`: reemplazar `FindAsync` por `FirstOrDefaultAsync` con `Include(Paciente)` + `Include(Medico).ThenInclude(Sucursal)` en `CancelarTurnoAsync`, `MarcarAusenciaAsync` y `ActualizarEstadoAsync` | MB | ✓ |
+| 12 | B13 | Backend | `TurnoService.CancelarTurnoAsync`: en lugar de bloquear cancelaciones con < 24hs, permitirlas e incrementar `NoShowCount` del paciente (y activar `Bloqueado` al llegar a 3) | B | ✓ |
+| 13 | B14 | Backend | `TurnoService.ActualizarEstadoAsync`: delegar a `CancelarTurnoAsync` cuando `estado == Cancelado` | MB | ✓ |
+| 14 | F9 | Frontend | `TurnoDetalle.vue`: sincronizar `nuevoEstado` con `turno.estado` tras cada acción exitosa (`cambiarEstado`, `cancelar`, `marcarAusencia`) | MB | ✓ |
+| 15 | F10 | Frontend | `TurnoDetalle.vue`: agregar fila "Sucursal" usando `turno.medico?.sucursal?.nombre` | MB | ✓ |
 
 ---
 
@@ -60,22 +65,22 @@
 
 ### Backend
 
-| # | ID | Tarea | Esfuerzo |
-|---|----|-------|----------|
-| 11 | NF1 | Agregar campo `UltimaActualizacion: DateTime?` al modelo `Turno` y generar migración de BD | B |
-| 12 | NF1 | Agregar configuración `NoShowPolicy: { DesbloqueoManualHabilitado: bool }` en `appsettings.json` | MB |
-| 13 | NF1 | `TurnoService.CancelarTurno`: si `FechaHora - DateTime.UtcNow < 24hs` → setear `UltimaActualizacion`, incrementar `NoShowCount`. Si `NoShowCount >= 3` → `Bloqueado = true`, `FechaBloqueo = DateTime.UtcNow` | B |
-| 14 | NF1 | `TurnoService.MarcarAusencia`: setear `UltimaActualizacion`, incrementar `NoShowCount`. Si `NoShowCount >= 3` → bloquear | B |
-| 15 | NF1 | `TurnoService.CrearTurno`: antes de validar bloqueo, verificar si `FechaBloqueo + 30 días < DateTime.UtcNow` → desbloquear (`Bloqueado = false`) y permitir continuar | B |
-| 16 | NF1 | `PacientesController`: agregar endpoint `POST /pacientes/{id}/desbloquear`, habilitado condicionalmente según config | B |
+| # | ID | Tarea | Esfuerzo | Estado |
+|---|----|-------|----------|--------|
+| 16 | NF1 | Agregar campo `UltimaActualizacion: DateTime?` al modelo `Turno` y generar migración de BD | B | Pendiente |
+| 17 | NF1 | Agregar configuración `NoShowPolicy: { DesbloqueoManualHabilitado: bool }` en `appsettings.json` | MB | Pendiente |
+| 18 | NF1 | `TurnoService.CancelarTurno`: marcado del paciente al cancelar con < 24hs (`NoShowCount++`, `Bloqueado` si ≥ 3) — **adelantado a Fase 1 como B13** | B | ✓ |
+| 19 | NF1 | `TurnoService.MarcarAusencia`: incrementar `NoShowCount` del paciente y activar bloqueo si ≥ 3 | B | Pendiente |
+| 20 | NF1 | `TurnoService.CrearTurno`: verificar si `FechaBloqueo + 30 días < DateTime.UtcNow` → desbloquear automáticamente antes de rechazar | B | Pendiente |
+| 21 | NF1 | `PacientesController`: agregar endpoint `POST /pacientes/{id}/desbloquear`, habilitado condicionalmente según config | B | Pendiente |
 
 ### Frontend
 
-| # | ID | Tarea | Esfuerzo |
-|---|----|-------|----------|
-| 17 | NF1 | `PacientesList.vue`: mostrar `NoShowCount` en la tabla y, si el paciente está bloqueado, mostrar fecha de desbloqueo automático (`FechaBloqueo + 30 días`) | B |
-| 18 | NF1 | `PacientesList.vue`: mostrar botón "Desbloquear" condicionalmente (paciente bloqueado + config habilitada) | B |
-| 19 | NF1 | `TurnoNuevo.vue`: si el backend rechaza por bloqueo, mostrar mensaje claro con la fecha estimada de desbloqueo | B |
+| # | ID | Tarea | Esfuerzo | Estado |
+|---|----|-------|----------|--------|
+| 22 | NF1 | `PacientesList.vue`: mostrar `NoShowCount` en la tabla y, si el paciente está bloqueado, mostrar fecha de desbloqueo automático (`FechaBloqueo + 30 días`) | B | Pendiente |
+| 23 | NF1 | `PacientesList.vue`: mostrar botón "Desbloquear" condicionalmente (paciente bloqueado + config habilitada) | B | Pendiente |
+| 24 | NF1 | `TurnoNuevo.vue`: si el backend rechaza por bloqueo, mostrar mensaje claro con la fecha estimada de desbloqueo | B | Pendiente |
 
 ---
 

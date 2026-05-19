@@ -22,6 +22,10 @@
 | F2 | Frontend | **Botón "Ver" sin estilos**: es un `<router-link>` sin clase CSS mientras que el botón "Cancelar" contiguo sí tiene estilo. Inconsistencia visual. | `TurnosList.vue:29` | Alta |
 | F3 | Frontend | **"← Volver a turnos" sin estilos**: `<router-link>` con estilos inline mínimos, sin clase de botón. Inconsistencia con el resto de la UI. | `TurnoDetalle.vue:3` | Alta |
 | F4 | Frontend | **Cancelación sin feedback ni refresco**: `cancelar()` llama a la API pero no actualiza la lista ni informa al usuario del resultado (éxito o error). | `TurnosList.vue:61` | Alta |
+| B12 | Backend | **Navigation properties ausentes en respuestas de mutación**: `CancelarTurnoAsync`, `MarcarAusenciaAsync` y `ActualizarEstadoAsync` usaban `FindAsync` que no carga `Paciente` ni `Medico`. El frontend recibía el turno sin datos del paciente, borrándolos de pantalla. **✓ Resuelto** — reemplazado por `FirstOrDefaultAsync` con `Include` + `ThenInclude(Sucursal)` en los tres métodos. | `TurnoService.cs` | Alta |
+| F9 | Frontend | **Selector de estado desincronizado tras una acción**: `nuevoEstado` se inicializaba en `mounted()` y nunca se actualizaba al cancelar, marcar ausencia o cambiar estado. El combo seguía mostrando el estado anterior. **✓ Resuelto** — se agrega `this.nuevoEstado = this.turno.estado` tras cada operación exitosa. | `TurnoDetalle.vue` | Alta |
+| B13 | Backend | **Cancelación bloqueada con < 24hs en lugar de marcar al paciente**: `CancelarTurnoAsync` lanzaba `InvalidOperationException` cuando la cancelación era con menos de 24hs de anticipación. El requerimiento establece que debe permitirse la cancelación pero penalizar al paciente igual que una ausencia. **✓ Resuelto** — si `FechaHora - UtcNow < 24hs`, se incrementa `NoShowCount`; al llegar a 3 se activa `Bloqueado = true` y `FechaBloqueo`. | `TurnoService.cs` | Alta |
+| B14 | Backend | **Cambiar estado a "Cancelado" sin lógica de negocio**: `ActualizarEstadoAsync` actualizaba el campo directamente sin aplicar las reglas de cancelación (ventana de 24hs, marcado de paciente). **✓ Resuelto** — cuando `estado == Cancelado`, `ActualizarEstadoAsync` delega a `CancelarTurnoAsync`. | `TurnoService.cs` | Alta |
 
 ### Medios
 
@@ -57,6 +61,7 @@
 | F6 | Frontend | **Sin manejo de errores en detalle de turno**: `cancelar()`, `cambiarEstado()` y `marcarAusencia()` no informan resultado al usuario. | `TurnoDetalle.vue:58` | Media |
 | F7 | Frontend | **Sin validación en formulario de turno**: el formulario se envía con campos vacíos sin advertencia. | `TurnoNuevo.vue:63` | Media |
 | F8 | Frontend | **Errores genéricos sin detalle**: todos los `catch` muestran "Error al procesar la solicitud" sin información útil. | Todos los `.vue` | Baja |
+| F10 | Frontend | **Sucursal ausente en el detalle del turno**: el detalle no mostraba la sucursal del médico. **✓ Resuelto** — se agrega fila "Sucursal" en `TurnoDetalle.vue` via `turno.medico?.sucursal?.nombre`. El backend ahora incluye `Sucursal` en todos los queries mediante `ThenInclude`. | `TurnoDetalle.vue` / `TurnoService.cs` | Baja |
 
 ### Calidad de código
 
@@ -96,9 +101,9 @@
 
 ## Resumen
 
-| Clasificación | Cant. | Alta | Media | Baja |
-|--------------|-------|------|-------|------|
-| Bugs | 7 | 6 | 1 | — |
-| Mejoras | 18 | 6 | 9 | 3 |
-| Nueva funcionalidad | 1 | — | — | — |
-| **Total** | **26** | **12** | **10** | **3** |
+| Clasificación | Cant. | Alta | Media | Baja | Resueltos |
+|--------------|-------|------|-------|------|-----------|
+| Bugs | 11 | 10 | 1 | — | 6 (B2, B3, B5, B12, B13, B14) |
+| Mejoras | 19 | 6 | 9 | 4 | 3 (F2, F3, F4→F9→F10) |
+| Nueva funcionalidad | 1 | — | — | — | Parcial (NF1 backend cancelación) |
+| **Total** | **31** | **16** | **10** | **4** | **9** |

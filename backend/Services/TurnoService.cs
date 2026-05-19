@@ -17,7 +17,7 @@ public class TurnoService : ITurnoService
     {
         return await _context.Turnos
             .Include(t => t.Paciente)
-            .Include(t => t.Medico)
+            .Include(t => t.Medico).ThenInclude(m => m.Sucursal)
             .ToListAsync();
     }
 
@@ -25,7 +25,7 @@ public class TurnoService : ITurnoService
     {
         var turno = await _context.Turnos
             .Include(t => t.Paciente)
-            .Include(t => t.Medico)
+            .Include(t => t.Medico).ThenInclude(m => m.Sucursal)
             .FirstOrDefaultAsync(t => t.Id == id);
 
         if (turno == null)
@@ -63,13 +63,23 @@ public class TurnoService : ITurnoService
 
     public async Task<Turno> CancelarTurnoAsync(int id)
     {
-        var turno = await _context.Turnos.FindAsync(id);
+        var turno = await _context.Turnos
+            .Include(t => t.Paciente)
+            .Include(t => t.Medico).ThenInclude(m => m.Sucursal)
+            .FirstOrDefaultAsync(t => t.Id == id);
         if (turno == null)
             throw new KeyNotFoundException($"Turno {id} no encontrado.");
 
-        // B2: usar UtcNow para comparar contra FechaHora guardada en UTC
-        if ((turno.FechaHora - DateTime.UtcNow).TotalHours < 24)
-            throw new InvalidOperationException("No se puede cancelar con menos de 24 horas de anticipación.");
+        // B2: si se cancela con menos de 24hs, se marca al paciente igual que una ausencia
+        if ((turno.FechaHora - DateTime.UtcNow).TotalHours < 24 && turno.Paciente != null)
+        {
+            turno.Paciente.NoShowCount++;
+            if (turno.Paciente.NoShowCount >= 3)
+            {
+                turno.Paciente.Bloqueado = true;
+                turno.Paciente.FechaBloqueo = DateTime.UtcNow;
+            }
+        }
 
         turno.Estado = EstadoTurno.Cancelado;
         await _context.SaveChangesAsync();
@@ -78,7 +88,10 @@ public class TurnoService : ITurnoService
 
     public async Task<Turno> MarcarAusenciaAsync(int id)
     {
-        var turno = await _context.Turnos.FindAsync(id);
+        var turno = await _context.Turnos
+            .Include(t => t.Paciente)
+            .Include(t => t.Medico).ThenInclude(m => m.Sucursal)
+            .FirstOrDefaultAsync(t => t.Id == id);
         if (turno == null)
             throw new KeyNotFoundException($"Turno {id} no encontrado.");
 
@@ -86,9 +99,10 @@ public class TurnoService : ITurnoService
         if (turno.FechaHora > DateTime.UtcNow)
             throw new InvalidOperationException("La ausencia solo puede registrarse después de la fecha del turno.");
 
+        /*
         if ((DateTime.UtcNow - turno.FechaHora).TotalHours > 24)
             throw new InvalidOperationException("La ausencia solo puede registrarse dentro de las 24 horas posteriores al turno.");
-
+        */
         turno.Estado = EstadoTurno.NoShow;
         await _context.SaveChangesAsync();
         return turno;
@@ -96,7 +110,13 @@ public class TurnoService : ITurnoService
 
     public async Task<Turno> ActualizarEstadoAsync(int id, EstadoTurno estado)
     {
-        var turno = await _context.Turnos.FindAsync(id);
+        if (estado == EstadoTurno.Cancelado)
+            return await CancelarTurnoAsync(id);
+
+        var turno = await _context.Turnos
+            .Include(t => t.Paciente)
+            .Include(t => t.Medico).ThenInclude(m => m.Sucursal)
+            .FirstOrDefaultAsync(t => t.Id == id);
         if (turno == null)
             throw new KeyNotFoundException($"Turno {id} no encontrado.");
 

@@ -7,6 +7,7 @@
       <div class="detail-row"><span class="label">DNI</span><span>{{ turno.paciente?.dni }}</span></div>
       <div class="detail-row"><span class="label">Médico</span><span>{{ turno.medico?.nombreCompleto }}</span></div>
       <div class="detail-row"><span class="label">Especialidad</span><span>{{ turno.medico?.especialidad }}</span></div>
+      <div class="detail-row"><span class="label">Sucursal</span><span>{{ turno.medico?.sucursal?.nombre }}</span></div>
       <div class="detail-row"><span class="label">Fecha y hora</span><span>{{ formatFecha(turno.fechaHora) }}</span></div>
       <div class="detail-row"><span class="label">Estado</span><span>{{ turno.estado }}</span></div>
       <div class="detail-row"><span class="label">Motivo</span><span>{{ turno.motivo }}</span></div>
@@ -60,6 +61,7 @@ export default {
       try {
         const res = await turnosApi.actualizarEstado(this.turno.id, { estado: this.nuevoEstado })
         this.turno = res.data
+        this.nuevoEstado = this.turno.estado
       } catch (err) {
         alert(err.response?.data?.mensaje || 'Error al actualizar el estado.')
       }
@@ -67,9 +69,9 @@ export default {
     async cancelar() {
       if (!confirm('¿Confirma que desea cancelar este turno?')) return
       try {
-        await turnosApi.cancelar(this.turno.id)
-        const res = await turnosApi.getById(this.turno.id)
+        const res = await turnosApi.cancelar(this.turno.id)
         this.turno = res.data
+        this.nuevoEstado = this.turno.estado
       } catch (err) {
         alert(err.response?.data?.mensaje || 'Error al cancelar el turno.')
       }
@@ -79,6 +81,7 @@ export default {
       try {
         const res = await turnosApi.marcarAusencia(this.turno.id)
         this.turno = res.data
+        this.nuevoEstado = this.turno.estado
       } catch (err) {
         alert(err.response?.data?.mensaje || 'Error al marcar la ausencia.')
       }
