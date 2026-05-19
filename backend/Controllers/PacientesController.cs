@@ -9,10 +9,12 @@ namespace TurnosMedicos.Controllers;
 public class PacientesController : ControllerBase
 {
     private readonly IPacienteService _pacienteService;
+    private readonly IConfiguration _configuration;
 
-    public PacientesController(IPacienteService pacienteService)
+    public PacientesController(IPacienteService pacienteService, IConfiguration configuration)
     {
         _pacienteService = pacienteService;
+        _configuration = configuration;
     }
 
     [HttpGet]
@@ -64,6 +66,24 @@ public class PacientesController : ControllerBase
         {
             await _pacienteService.DeleteAsync(id);
             return NoContent();
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { mensaje = ex.Message });
+        }
+    }
+
+    [HttpPost("{id}/desbloquear")]
+    public async Task<IActionResult> Desbloquear(int id)
+    {
+        var habilitado = _configuration.GetValue<bool>("NoShowPolicy:DesbloqueoManualHabilitado");
+        if (!habilitado)
+            return BadRequest(new { mensaje = "El desbloqueo manual no está habilitado en esta instalación." });
+
+        try
+        {
+            var paciente = await _pacienteService.DesbloquearAsync(id);
+            return Ok(paciente);
         }
         catch (KeyNotFoundException ex)
         {

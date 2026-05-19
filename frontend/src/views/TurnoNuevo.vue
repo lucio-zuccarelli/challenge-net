@@ -69,8 +69,8 @@ export default {
           motivo: this.form.motivo
         })
         this.$router.push('/turnos')
-      } catch {
-        alert('Error al procesar la solicitud')
+      } catch (err) {
+        alert(err.response?.data?.mensaje || 'Error al procesar la solicitud')
       }
     }
   }
