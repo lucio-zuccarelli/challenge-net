@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using TurnosMedicos.Data;
 using TurnosMedicos.Models;
+using TurnosMedicos.Services;
 
 namespace TurnosMedicos.Controllers;
 
@@ -9,61 +8,66 @@ namespace TurnosMedicos.Controllers;
 [Route("[controller]")]
 public class PacientesController : ControllerBase
 {
-    private readonly AppDbContext _context;
+    private readonly IPacienteService _pacienteService;
 
-    public PacientesController(AppDbContext context)
+    public PacientesController(IPacienteService pacienteService)
     {
-        _context = context;
+        _pacienteService = pacienteService;
     }
 
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
-        var pacientes = await _context.Pacientes.ToListAsync();
+        var pacientes = await _pacienteService.GetAllAsync();
         return Ok(pacientes);
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(int id)
     {
-        var paciente = await _context.Pacientes.FindAsync(id);
-        if (paciente == null) return NotFound();
-        return Ok(paciente);
+        try
+        {
+            var paciente = await _pacienteService.GetByIdAsync(id);
+            return Ok(paciente);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { mensaje = ex.Message });
+        }
     }
 
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] Paciente paciente)
     {
-        paciente.createdAt = DateTime.UtcNow;
-        paciente.isActive = true;
-        _context.Pacientes.Add(paciente);
-        await _context.SaveChangesAsync();
-        return CreatedAtAction(nameof(GetById), new { id = paciente.Id }, paciente);
+        var creado = await _pacienteService.CreateAsync(paciente);
+        return CreatedAtAction(nameof(GetById), new { id = creado.Id }, creado);
     }
 
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(int id, [FromBody] Paciente paciente)
     {
-        var existing = await _context.Pacientes.FindAsync(id);
-        if (existing == null) return NotFound();
-
-        existing.NombreCompleto = paciente.NombreCompleto;
-        existing.DNI = paciente.DNI;
-        existing.Email = paciente.Email;
-        existing.Telefono = paciente.Telefono;
-
-        await _context.SaveChangesAsync();
-        return Ok(existing);
+        try
+        {
+            var actualizado = await _pacienteService.UpdateAsync(id, paciente);
+            return Ok(actualizado);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { mensaje = ex.Message });
+        }
     }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
-        var paciente = await _context.Pacientes.FindAsync(id);
-        if (paciente == null) return NotFound();
-
-        _context.Pacientes.Remove(paciente);
-        await _context.SaveChangesAsync();
-        return NoContent();
+        try
+        {
+            await _pacienteService.DeleteAsync(id);
+            return NoContent();
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { mensaje = ex.Message });
+        }
     }
 }

@@ -25,8 +25,8 @@
             <span :class="['badge', `badge-${turno.estado?.toLowerCase()}`]">{{ turno.estado }}</span>
           </td>
           <td>{{ turno.motivo }}</td>
-          <td>
-            <router-link :to="`/turnos/${turno.id}`">Ver</router-link>
+          <td style="display: flex; align-items: center">
+            <router-link :to="`/turnos/${turno.id}`" class="btn-ver">Ver</router-link>
             <button class="btn-danger" style="margin-left: 8px" @click="cancelar(turno.id)">Cancelar</button>
           </td>
         </tr>
@@ -59,7 +59,14 @@ export default {
       return new Date(fecha).toLocaleString('es-AR')
     },
     async cancelar(id) {
-      await turnosApi.cancelar(id)
+      if (!confirm('¿Confirma que desea cancelar este turno?')) return
+      try {
+        await turnosApi.cancelar(id)
+        const res = await turnosApi.getAll()
+        this.turnos = res.data
+      } catch (err) {
+        alert(err.response?.data?.mensaje || 'Error al cancelar el turno.')
+      }
     }
   }
 }
@@ -77,4 +84,16 @@ export default {
 .badge-cancelado   { background: #f8d7da; color: #721c24; }
 .badge-atendido    { background: #d1ecf1; color: #0c5460; }
 .badge-noshow      { background: #e2e3e5; color: #383d41; }
+
+.btn-ver {
+  display: inline-block;
+  padding: 4px 12px;
+  background: #1a73e8;
+  color: #fff;
+  border-radius: 4px;
+  font-size: 13px;
+  text-decoration: none;
+  margin-left: 8px;
+}
+.btn-ver:hover { background: #1558b0; }
 </style>

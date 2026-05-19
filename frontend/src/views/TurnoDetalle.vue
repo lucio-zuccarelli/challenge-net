@@ -1,12 +1,13 @@
 <template>
   <div>
-    <router-link to="/turnos" style="font-size:14px; color:#1a73e8">← Volver a turnos</router-link>
+    <router-link to="/turnos" class="btn-volver">← Volver a turnos</router-link>
     <div v-if="turno" class="card" style="margin-top: 20px; max-width: 560px">
       <h2>Turno #{{ turno.id }}</h2>
       <div class="detail-row"><span class="label">Paciente</span><span>{{ turno.paciente?.nombreCompleto }}</span></div>
       <div class="detail-row"><span class="label">DNI</span><span>{{ turno.paciente?.dni }}</span></div>
       <div class="detail-row"><span class="label">Médico</span><span>{{ turno.medico?.nombreCompleto }}</span></div>
       <div class="detail-row"><span class="label">Especialidad</span><span>{{ turno.medico?.especialidad }}</span></div>
+      <div class="detail-row"><span class="label">Sucursal</span><span>{{ turno.medico?.sucursal?.nombre }}</span></div>
       <div class="detail-row"><span class="label">Fecha y hora</span><span>{{ formatFecha(turno.fechaHora) }}</span></div>
       <div class="detail-row"><span class="label">Estado</span><span>{{ turno.estado }}</span></div>
       <div class="detail-row"><span class="label">Motivo</span><span>{{ turno.motivo }}</span></div>
@@ -56,18 +57,34 @@ export default {
       return new Date(fecha).toLocaleString('es-AR')
     },
     async cambiarEstado() {
+      if (!confirm(`¿Confirma el cambio de estado a "${this.nuevoEstado}"?`)) return
       try {
         const res = await turnosApi.actualizarEstado(this.turno.id, { estado: this.nuevoEstado })
         this.turno = res.data
-      } catch {
-        alert('Error al procesar la solicitud')
+        this.nuevoEstado = this.turno.estado
+      } catch (err) {
+        alert(err.response?.data?.mensaje || 'Error al actualizar el estado.')
       }
     },
     async cancelar() {
-      await turnosApi.cancelar(this.turno.id)
+      if (!confirm('¿Confirma que desea cancelar este turno?')) return
+      try {
+        const res = await turnosApi.cancelar(this.turno.id)
+        this.turno = res.data
+        this.nuevoEstado = this.turno.estado
+      } catch (err) {
+        alert(err.response?.data?.mensaje || 'Error al cancelar el turno.')
+      }
     },
     async marcarAusencia() {
-      await turnosApi.marcarAusencia(this.turno.id)
+      if (!confirm('¿Confirma que desea marcar ausencia para este turno?')) return
+      try {
+        const res = await turnosApi.marcarAusencia(this.turno.id)
+        this.turno = res.data
+        this.nuevoEstado = this.turno.estado
+      } catch (err) {
+        alert(err.response?.data?.mensaje || 'Error al marcar la ausencia.')
+      }
     }
   }
 }
@@ -86,4 +103,15 @@ export default {
   color: #666;
   flex-shrink: 0;
 }
+
+.btn-volver {
+  display: inline-block;
+  padding: 6px 14px;
+  background: #f1f3f4;
+  color: #1a73e8;
+  border-radius: 4px;
+  font-size: 14px;
+  text-decoration: none;
+}
+.btn-volver:hover { background: #e2e5e8; }
 </style>
