@@ -29,7 +29,7 @@
             <span v-else style="color: #388e3c">Activo</span>
           </td>
           <td style="display: flex; gap: 8px; align-items: center">
-            <button v-if="p.bloqueado" @click="desbloquear(p.id)">Desbloquear</button>
+            <button v-if="p.bloqueado && desbloqueoManualHabilitado" @click="desbloquear(p.id)">Desbloquear</button>
             <button class="btn-danger" @click="eliminar(p.id)">Eliminar</button>
           </td>
         </tr>
@@ -40,19 +40,24 @@
 </template>
 
 <script>
-import { pacientesApi } from '../services/api'
+import { pacientesApi, configuracionApi } from '../services/api'
 
 export default {
   name: 'PacientesList',
   data() {
     return {
-      pacientes: []
+      pacientes: [],
+      desbloqueoManualHabilitado: false
     }
   },
   async mounted() {
     try {
-      const res = await pacientesApi.getAll()
-      this.pacientes = res.data
+      const [pRes, configRes] = await Promise.all([
+        pacientesApi.getAll(),
+        configuracionApi.getPoliticaNoShow()
+      ])
+      this.pacientes = pRes.data
+      this.desbloqueoManualHabilitado = configRes.data.desbloqueoManualHabilitado
     } catch {
       alert('Error al procesar la solicitud')
     }

@@ -27,3 +27,7 @@ export const medicosApi = {
 export const sucursalesApi = {
   getAll: () => axios.get(`${BASE_URL}/sucursales`)
 }
+
+export const configuracionApi = {
+  getPoliticaNoShow: () => axios.get(`${BASE_URL}/configuracion/politica-noshow`)
+}
