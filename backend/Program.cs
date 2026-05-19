@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using TurnosMedicos.Data;
+using TurnosMedicos.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +14,9 @@ builder.Services.AddControllers().AddJsonOptions(options =>
     options.JsonSerializerOptions.Converters.Add(
         new System.Text.Json.Serialization.JsonStringEnumConverter());
 });
+
+builder.Services.AddScoped<ITurnoService, TurnoService>();
+builder.Services.AddScoped<IPacienteService, PacienteService>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
