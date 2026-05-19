@@ -56,11 +56,12 @@ export default {
   },
   methods: {
     async eliminar(id) {
+      if (!confirm('¿Confirma que desea eliminar este paciente? Esta acción no se puede deshacer.')) return
       try {
         await pacientesApi.delete(id)
         this.pacientes = this.pacientes.filter(p => p.id !== id)
-      } catch {
-        alert('Error al procesar la solicitud')
+      } catch (err) {
+        alert(err.response?.data?.mensaje || 'Error al eliminar el paciente.')
       }
     }
   }
