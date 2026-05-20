@@ -11,4 +11,5 @@ public class Turno
     public EstadoTurno Estado { get; set; }
     public DateTime FechaCreacion { get; set; }
     public string Motivo { get; set; } = string.Empty;
+    public DateTime? UltimaActualizacion { get; set; }
 }

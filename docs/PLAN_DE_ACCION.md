@@ -67,20 +67,21 @@
 
 | # | ID | Tarea | Esfuerzo | Estado |
 |---|----|-------|----------|--------|
-| 16 | NF1 | Agregar campo `UltimaActualizacion: DateTime?` al modelo `Turno` y generar migración de BD | B | Pendiente |
-| 17 | NF1 | Agregar configuración `NoShowPolicy: { DesbloqueoManualHabilitado: bool }` en `appsettings.json` | MB | Pendiente |
+| 16 | NF1 | Agregar campo `UltimaActualizacion: DateTime?` al modelo `Turno`. Se actualiza en `CancelarTurnoAsync`, `MarcarAusenciaAsync` y `ActualizarEstadoAsync`. Deja preparada la base para implementar ventanas de tiempo en el futuro. | B | ✓ |
+| 17 | NF1 | Agregar sección `NoShowPolicy: { DesbloqueoManualHabilitado, LimitNoShow, DiasBloqueo }` en `appsettings.json` | MB | ✓ |
 | 18 | NF1 | `TurnoService.CancelarTurno`: marcado del paciente al cancelar con < 24hs (`NoShowCount++`, `Bloqueado` si ≥ 3) — **adelantado a Fase 1 como B13** | B | ✓ |
-| 19 | NF1 | `TurnoService.MarcarAusencia`: incrementar `NoShowCount` del paciente y activar bloqueo si ≥ 3 | B | Pendiente |
-| 20 | NF1 | `TurnoService.CrearTurno`: verificar si `FechaBloqueo + 30 días < DateTime.UtcNow` → desbloquear automáticamente antes de rechazar | B | Pendiente |
-| 21 | NF1 | `PacientesController`: agregar endpoint `POST /pacientes/{id}/desbloquear`, habilitado condicionalmente según config | B | Pendiente |
+| 19 | NF1 | `TurnoService.MarcarAusencia`: incrementar `NoShowCount` del paciente y activar bloqueo si ≥ 3 | B | ✓ |
+| 20 | NF1 | `TurnoService.CrearTurno`: verificar si `FechaBloqueo + 30 días < DateTime.UtcNow` → desbloquear automáticamente antes de rechazar; mensaje de error con fecha estimada | B | ✓ |
+| 21 | NF1 | `PacientesController`: endpoint `POST /pacientes/{id}/desbloquear` condicional según config | B | ✓ |
+| 25 | NF1 | `ConfiguracionController`: endpoint `GET /configuracion/politica-noshow` para exponer config al frontend sin duplicar | MB | ✓ |
 
 ### Frontend
 
 | # | ID | Tarea | Esfuerzo | Estado |
 |---|----|-------|----------|--------|
-| 22 | NF1 | `PacientesList.vue`: mostrar `NoShowCount` en la tabla y, si el paciente está bloqueado, mostrar fecha de desbloqueo automático (`FechaBloqueo + 30 días`) | B | Pendiente |
-| 23 | NF1 | `PacientesList.vue`: mostrar botón "Desbloquear" condicionalmente (paciente bloqueado + config habilitada) | B | Pendiente |
-| 24 | NF1 | `TurnoNuevo.vue`: si el backend rechaza por bloqueo, mostrar mensaje claro con la fecha estimada de desbloqueo | B | Pendiente |
+| 22 | NF1 | `PacientesList.vue`: mostrar `NoShowCount` en la tabla y, si el paciente está bloqueado, mostrar fecha de desbloqueo automático (`FechaBloqueo + 30 días`) | B | ✓ |
+| 23 | NF1 | `PacientesList.vue`: mostrar botón "Desbloquear" condicionalmente — consume `GET /configuracion/politica-noshow` en `mounted()` y usa `desbloqueoManualHabilitado` en `v-if` | B | ✓ |
+| 24 | NF1 | `TurnoNuevo.vue`: propagar `err.response?.data?.mensaje` al usuario (incluye fecha estimada de desbloqueo devuelta por el backend) | B | ✓ |
 
 ---
 
@@ -134,11 +135,11 @@
 
 ## Resumen por fase
 
-| Fase | Rama | Ítems | Esfuerzo total estimado |
-|------|------|-------|------------------------|
-| 1 | `fix/bugs-criticos-capa-servicios` | 10 | Medio-Alto |
-| 2 | `feature/politica-noshow` | 9 | Medio |
-| 3 | `feature/mejoras-seguridad-logica` | 4 | Bajo |
-| 4 | `feature/validaciones-ux` | 7 | Medio |
-| 5 | `feature/arquitectura-calidad` | 4 | Alto |
-| **Total** | | **34** | |
+| Fase | Rama | Ítems | Estado | Esfuerzo total estimado |
+|------|------|-------|--------|------------------------|
+| 1 | `fix/bugs-criticos-capa-servicios` | 15 | ✓ Completa | Medio-Alto |
+| 2 | `feature/politica-noshow` | 10 | ✓ Completa | Medio |
+| 3 | `feature/mejoras-seguridad-logica` | 4 | Pendiente | Bajo |
+| 4 | `feature/validaciones-ux` | 7 | Pendiente | Medio |
+| 5 | `feature/arquitectura-calidad` | 4 | Pendiente | Alto |
+| **Total** | | **40** | | |

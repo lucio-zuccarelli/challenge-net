@@ -97,6 +97,7 @@ public class TurnoService : ITurnoService
         }
 
         turno.Estado = EstadoTurno.Cancelado;
+        turno.UltimaActualizacion = DateTime.UtcNow;
         await _context.SaveChangesAsync();
         return turno;
     }
@@ -125,6 +126,7 @@ public class TurnoService : ITurnoService
         }
 
         turno.Estado = EstadoTurno.NoShow;
+        turno.UltimaActualizacion = DateTime.UtcNow;
         await _context.SaveChangesAsync();
         return turno;
     }
@@ -142,6 +144,7 @@ public class TurnoService : ITurnoService
             throw new KeyNotFoundException($"Turno {id} no encontrado.");
 
         turno.Estado = estado;
+        turno.UltimaActualizacion = DateTime.UtcNow;
         await _context.SaveChangesAsync();
         return turno;
     }
