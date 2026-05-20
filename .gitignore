@@ -8,6 +8,9 @@ backend/*.db-wal
 # Node
 frontend/node_modules/
 frontend/dist/
+frontend/.env.development
+frontend/.env.production
+frontend/.env.local
 
 # OS
 .DS_Store
