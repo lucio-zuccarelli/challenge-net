@@ -68,7 +68,8 @@ public class PacienteService : IPacienteService
 
         paciente.Bloqueado = false;
         paciente.FechaBloqueo = null;
-        paciente.NoShowCount = 0;
+        // Lógica para restar 1 a NoShowCount si es mayor a 0, sino dejarlo en 0
+        paciente.NoShowCount = paciente.NoShowCount > 0 ? paciente.NoShowCount - 1 : 0;
         await _context.SaveChangesAsync();
         return paciente;
     }
