@@ -41,7 +41,22 @@ public class TurnoService : ITurnoService
             throw new KeyNotFoundException("Paciente no encontrado.");
 
         if (paciente.Bloqueado)
-            throw new InvalidOperationException("El paciente se encuentra bloqueado para agendar turnos online.");
+        {
+            // NF1: desbloqueo automático a los 30 días
+            if (paciente.FechaBloqueo.HasValue && (DateTime.UtcNow - paciente.FechaBloqueo.Value).TotalDays >= 30)
+            {
+                paciente.Bloqueado = false;
+                paciente.FechaBloqueo = null;
+                await _context.SaveChangesAsync();
+            }
+            else
+            {
+                var fechaDesbloqueo = paciente.FechaBloqueo.HasValue
+                    ? paciente.FechaBloqueo.Value.AddDays(30).ToString("dd/MM/yyyy")
+                    : "indefinida";
+                throw new InvalidOperationException($"El paciente se encuentra bloqueado para agendar turnos online. Podrá volver a sacar turno a partir del {fechaDesbloqueo}.");
+            }
+        }
 
         var medicoExiste = await _context.Medicos.AnyAsync(m => m.Id == turno.MedicoId);
         if (!medicoExiste)
@@ -82,6 +97,7 @@ public class TurnoService : ITurnoService
         }
 
         turno.Estado = EstadoTurno.Cancelado;
+        turno.UltimaActualizacion = DateTime.UtcNow;
         await _context.SaveChangesAsync();
         return turno;
     }
@@ -99,11 +115,18 @@ public class TurnoService : ITurnoService
         if (turno.FechaHora > DateTime.UtcNow)
             throw new InvalidOperationException("La ausencia solo puede registrarse después de la fecha del turno.");
 
-        /*
-        if ((DateTime.UtcNow - turno.FechaHora).TotalHours > 24)
-            throw new InvalidOperationException("La ausencia solo puede registrarse dentro de las 24 horas posteriores al turno.");
-        */
+        if (turno.Paciente != null)
+        {
+            turno.Paciente.NoShowCount++;
+            if (turno.Paciente.NoShowCount >= 3)
+            {
+                turno.Paciente.Bloqueado = true;
+                turno.Paciente.FechaBloqueo = DateTime.UtcNow;
+            }
+        }
+
         turno.Estado = EstadoTurno.NoShow;
+        turno.UltimaActualizacion = DateTime.UtcNow;
         await _context.SaveChangesAsync();
         return turno;
     }
@@ -121,6 +144,7 @@ public class TurnoService : ITurnoService
             throw new KeyNotFoundException($"Turno {id} no encontrado.");
 
         turno.Estado = estado;
+        turno.UltimaActualizacion = DateTime.UtcNow;
         await _context.SaveChangesAsync();
         return turno;
     }

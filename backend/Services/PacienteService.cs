@@ -59,4 +59,18 @@ public class PacienteService : IPacienteService
         _context.Pacientes.Remove(paciente);
         await _context.SaveChangesAsync();
     }
+
+    public async Task<Paciente> DesbloquearAsync(int id)
+    {
+        var paciente = await _context.Pacientes.FindAsync(id);
+        if (paciente == null)
+            throw new KeyNotFoundException($"Paciente {id} no encontrado.");
+
+        paciente.Bloqueado = false;
+        paciente.FechaBloqueo = null;
+        // Lógica para restar 1 a NoShowCount si es mayor a 0, sino dejarlo en 0
+        paciente.NoShowCount = paciente.NoShowCount > 0 ? paciente.NoShowCount - 1 : 0;
+        await _context.SaveChangesAsync();
+        return paciente;
+    }
 }

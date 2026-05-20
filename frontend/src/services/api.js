@@ -12,11 +12,12 @@ export const turnosApi = {
 }
 
 export const pacientesApi = {
-  getAll:  ()          => axios.get(`${BASE_URL}/pacientes`),
-  getById: (id)        => axios.get(`${BASE_URL}/pacientes/${id}`),
-  create:  (data)      => axios.post(`${BASE_URL}/pacientes`, data),
-  update:  (id, data)  => axios.put(`${BASE_URL}/pacientes/${id}`, data),
-  delete:  (id)        => axios.delete(`${BASE_URL}/pacientes/${id}`)
+  getAll:      ()          => axios.get(`${BASE_URL}/pacientes`),
+  getById:     (id)        => axios.get(`${BASE_URL}/pacientes/${id}`),
+  create:      (data)      => axios.post(`${BASE_URL}/pacientes`, data),
+  update:      (id, data)  => axios.put(`${BASE_URL}/pacientes/${id}`, data),
+  delete:      (id)        => axios.delete(`${BASE_URL}/pacientes/${id}`),
+  desbloquear: (id)        => axios.post(`${BASE_URL}/pacientes/${id}/desbloquear`)
 }
 
 export const medicosApi = {
@@ -25,4 +26,8 @@ export const medicosApi = {
 
 export const sucursalesApi = {
   getAll: () => axios.get(`${BASE_URL}/sucursales`)
+}
+
+export const configuracionApi = {
+  getPoliticaNoShow: () => axios.get(`${BASE_URL}/configuracion/politica-noshow`)
 }
