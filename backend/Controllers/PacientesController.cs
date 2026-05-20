@@ -71,6 +71,10 @@ public class PacientesController : ControllerBase
         {
             return NotFound(new { mensaje = ex.Message });
         }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { mensaje = ex.Message });
+        }
     }
 
     [HttpPost("{id}/desbloquear")]
