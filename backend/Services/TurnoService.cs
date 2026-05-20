@@ -131,6 +131,15 @@ public class TurnoService : ITurnoService
         return turno;
     }
 
+    private static readonly Dictionary<EstadoTurno, EstadoTurno[]> _transicionesValidas = new()
+    {
+        [EstadoTurno.Pendiente]   = [EstadoTurno.Confirmado, EstadoTurno.Cancelado],
+        [EstadoTurno.Confirmado]  = [EstadoTurno.Atendido,   EstadoTurno.Cancelado, EstadoTurno.NoShow],
+        [EstadoTurno.Cancelado]   = [],
+        [EstadoTurno.Atendido]    = [],
+        [EstadoTurno.NoShow]      = [],
+    };
+
     public async Task<Turno> ActualizarEstadoAsync(int id, EstadoTurno estado)
     {
         if (estado == EstadoTurno.Cancelado)
@@ -142,6 +151,9 @@ public class TurnoService : ITurnoService
             .FirstOrDefaultAsync(t => t.Id == id);
         if (turno == null)
             throw new KeyNotFoundException($"Turno {id} no encontrado.");
+
+        if (!_transicionesValidas[turno.Estado].Contains(estado))
+            throw new InvalidOperationException($"No se puede cambiar el estado de '{turno.Estado}' a '{estado}'.");
 
         turno.Estado = estado;
         turno.UltimaActualizacion = DateTime.UtcNow;
