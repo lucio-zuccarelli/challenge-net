@@ -56,6 +56,12 @@ public class PacienteService : IPacienteService
         if (paciente == null)
             throw new KeyNotFoundException($"Paciente {id} no encontrado.");
 
+        var tieneTurnosActivos = await _context.Turnos.AnyAsync(t =>
+            t.PacienteId == id &&
+            (t.Estado == EstadoTurno.Pendiente || t.Estado == EstadoTurno.Confirmado));
+        if (tieneTurnosActivos)
+            throw new InvalidOperationException("No se puede eliminar el paciente porque tiene turnos activos (Pendiente o Confirmado).");
+
         _context.Pacientes.Remove(paciente);
         await _context.SaveChangesAsync();
     }
@@ -68,8 +74,6 @@ public class PacienteService : IPacienteService
 
         paciente.Bloqueado = false;
         paciente.FechaBloqueo = null;
-        // Lógica para restar 1 a NoShowCount si es mayor a 0, sino dejarlo en 0
-        paciente.NoShowCount = paciente.NoShowCount > 0 ? paciente.NoShowCount - 1 : 0;
         await _context.SaveChangesAsync();
         return paciente;
     }
