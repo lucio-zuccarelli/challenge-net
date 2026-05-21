@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using TurnosMedicos.Data;
+using TurnosMedicos.DTOs;
 using TurnosMedicos.Models;
 
 namespace TurnosMedicos.Services;
@@ -7,57 +8,74 @@ namespace TurnosMedicos.Services;
 public class PacienteService : IPacienteService
 {
     private readonly AppDbContext _context;
+    private readonly ILogger<PacienteService> _logger;
 
-    public PacienteService(AppDbContext context)
+    public PacienteService(AppDbContext context, ILogger<PacienteService> logger)
     {
         _context = context;
+        _logger  = logger;
     }
 
-    public async Task<IEnumerable<Paciente>> GetAllAsync()
+    public async Task<IEnumerable<PacienteResponseDto>> GetAllAsync()
     {
-        return await _context.Pacientes.ToListAsync();
+        var pacientes = await _context.Pacientes.ToListAsync();
+        return pacientes.Select(PacienteResponseDto.FromModel);
     }
 
-    public async Task<Paciente> GetByIdAsync(int id)
+    public async Task<PacienteResponseDto> GetByIdAsync(int id)
     {
         var paciente = await _context.Pacientes.FindAsync(id);
         if (paciente == null)
             throw new KeyNotFoundException($"Paciente {id} no encontrado.");
-        return paciente;
+        return PacienteResponseDto.FromModel(paciente);
     }
 
-    public async Task<Paciente> CreateAsync(Paciente paciente)
+    public async Task<PacienteResponseDto> CreateAsync(PacienteCreateDto dto)
     {
-        if (string.IsNullOrWhiteSpace(paciente.NombreCompleto))
+        if (string.IsNullOrWhiteSpace(dto.NombreCompleto))
             throw new ArgumentException("El nombre completo es requerido.");
-        if (string.IsNullOrWhiteSpace(paciente.DNI))
+        if (string.IsNullOrWhiteSpace(dto.DNI))
             throw new ArgumentException("El DNI es requerido.");
 
-        paciente.CreatedAt = DateTime.UtcNow;
-        paciente.IsActive = true;
+        var paciente = new Paciente
+        {
+            NombreCompleto = dto.NombreCompleto,
+            DNI            = dto.DNI,
+            Email          = dto.Email,
+            Telefono       = dto.Telefono,
+            CreatedAt      = DateTime.UtcNow,
+            IsActive       = true,
+        };
+
         _context.Pacientes.Add(paciente);
         await _context.SaveChangesAsync();
-        return paciente;
+
+        _logger.LogInformation("Paciente {PacienteId} ({NombreCompleto}, DNI {DNI}) creado.", paciente.Id, paciente.NombreCompleto, paciente.DNI);
+
+        return PacienteResponseDto.FromModel(paciente);
     }
 
-    public async Task<Paciente> UpdateAsync(int id, Paciente paciente)
+    public async Task<PacienteResponseDto> UpdateAsync(int id, PacienteUpdateDto dto)
     {
-        if (string.IsNullOrWhiteSpace(paciente.NombreCompleto))
+        if (string.IsNullOrWhiteSpace(dto.NombreCompleto))
             throw new ArgumentException("El nombre completo es requerido.");
-        if (string.IsNullOrWhiteSpace(paciente.DNI))
+        if (string.IsNullOrWhiteSpace(dto.DNI))
             throw new ArgumentException("El DNI es requerido.");
 
         var existing = await _context.Pacientes.FindAsync(id);
         if (existing == null)
             throw new KeyNotFoundException($"Paciente {id} no encontrado.");
 
-        existing.NombreCompleto = paciente.NombreCompleto;
-        existing.DNI = paciente.DNI;
-        existing.Email = paciente.Email;
-        existing.Telefono = paciente.Telefono;
+        existing.NombreCompleto = dto.NombreCompleto;
+        existing.DNI            = dto.DNI;
+        existing.Email          = dto.Email;
+        existing.Telefono       = dto.Telefono;
 
         await _context.SaveChangesAsync();
-        return existing;
+
+        _logger.LogInformation("Paciente {PacienteId} actualizado.", id);
+
+        return PacienteResponseDto.FromModel(existing);
     }
 
     public async Task DeleteAsync(int id)
@@ -74,17 +92,22 @@ public class PacienteService : IPacienteService
 
         _context.Pacientes.Remove(paciente);
         await _context.SaveChangesAsync();
+
+        _logger.LogInformation("Paciente {PacienteId} ({NombreCompleto}) eliminado.", id, paciente.NombreCompleto);
     }
 
-    public async Task<Paciente> DesbloquearAsync(int id)
+    public async Task<PacienteResponseDto> DesbloquearAsync(int id)
     {
         var paciente = await _context.Pacientes.FindAsync(id);
         if (paciente == null)
             throw new KeyNotFoundException($"Paciente {id} no encontrado.");
 
-        paciente.Bloqueado = false;
+        paciente.Bloqueado    = false;
         paciente.FechaBloqueo = null;
         await _context.SaveChangesAsync();
-        return paciente;
+
+        _logger.LogInformation("Paciente {PacienteId} desbloqueado manualmente por operador.", id);
+
+        return PacienteResponseDto.FromModel(paciente);
     }
 }

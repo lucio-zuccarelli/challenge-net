@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using TurnosMedicos.Models;
+using TurnosMedicos.DTOs;
 using TurnosMedicos.Services;
 
 namespace TurnosMedicos.Controllers;
@@ -14,7 +14,7 @@ public class PacientesController : ControllerBase
     public PacientesController(IPacienteService pacienteService, IConfiguration configuration)
     {
         _pacienteService = pacienteService;
-        _configuration = configuration;
+        _configuration   = configuration;
     }
 
     [HttpGet]
@@ -39,11 +39,11 @@ public class PacientesController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create([FromBody] Paciente paciente)
+    public async Task<IActionResult> Create([FromBody] PacienteCreateDto dto)
     {
         try
         {
-            var creado = await _pacienteService.CreateAsync(paciente);
+            var creado = await _pacienteService.CreateAsync(dto);
             return CreatedAtAction(nameof(GetById), new { id = creado.Id }, creado);
         }
         catch (ArgumentException ex)
@@ -53,11 +53,11 @@ public class PacientesController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, [FromBody] Paciente paciente)
+    public async Task<IActionResult> Update(int id, [FromBody] PacienteUpdateDto dto)
     {
         try
         {
-            var actualizado = await _pacienteService.UpdateAsync(id, paciente);
+            var actualizado = await _pacienteService.UpdateAsync(id, dto);
             return Ok(actualizado);
         }
         catch (KeyNotFoundException ex)

@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using TurnosMedicos.DTOs;
 using TurnosMedicos.Models;
 using TurnosMedicos.Services;
 
@@ -37,11 +38,11 @@ public class TurnosController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> CrearTurno([FromBody] Turno turno)
+    public async Task<IActionResult> CrearTurno([FromBody] TurnoCreateDto dto)
     {
         try
         {
-            var creado = await _turnoService.CrearTurnoAsync(turno);
+            var creado = await _turnoService.CrearTurnoAsync(dto);
             return CreatedAtAction(nameof(GetById), new { id = creado.Id }, creado);
         }
         catch (KeyNotFoundException ex)
@@ -58,7 +59,6 @@ public class TurnosController : ControllerBase
         }
     }
 
-    // B3: cambiado de [HttpGet("cancelar/{id}")] a [HttpPost("{id}/cancelar")]
     [HttpPost("{id}/cancelar")]
     public async Task<IActionResult> CancelarTurno(int id)
     {
@@ -96,11 +96,11 @@ public class TurnosController : ControllerBase
     }
 
     [HttpPut("{id}/estado")]
-    public async Task<IActionResult> ActualizarEstado(int id, [FromBody] ActualizarEstadoRequest request)
+    public async Task<IActionResult> ActualizarEstado(int id, [FromBody] TurnoActualizarEstadoDto dto)
     {
         try
         {
-            var turno = await _turnoService.ActualizarEstadoAsync(id, request.Estado);
+            var turno = await _turnoService.ActualizarEstadoAsync(id, dto.Estado);
             return Ok(turno);
         }
         catch (KeyNotFoundException ex)
@@ -112,9 +112,4 @@ public class TurnosController : ControllerBase
             return BadRequest(new { mensaje = ex.Message });
         }
     }
-}
-
-public class ActualizarEstadoRequest
-{
-    public EstadoTurno Estado { get; set; }
 }

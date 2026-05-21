@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TurnosMedicos.Data;
+using TurnosMedicos.DTOs;
 
 namespace TurnosMedicos.Controllers;
 
@@ -19,6 +20,6 @@ public class MedicosController : ControllerBase
     public async Task<IActionResult> GetAll()
     {
         var medicos = await _context.Medicos.Include(m => m.Sucursal).ToListAsync();
-        return Ok(medicos);
+        return Ok(medicos.Select(MedicoResponseDto.FromModel));
     }
 }
