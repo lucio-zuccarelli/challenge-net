@@ -124,12 +124,12 @@
 
 **Rama:** `feature/arquitectura-calidad`
 
-| # | ID | Área | Tarea | Esfuerzo |
-|---|----|------|-------|----------|
-| 31 | E3 | Backend | Introducir DTOs para las respuestas de la API, desacoplando los modelos de BD del contrato público | M |
-| 32 | E4 | Backend | Agregar logging con `ILogger` en operaciones críticas: creación, cancelaciones, bloqueos y ausencias | B |
-| 33 | E5 | Ambos | Incorporar tests unitarios para servicios y tests de integración para los endpoints principales | A |
-| 34 | E1 | Ambos | Evaluar e implementar autenticación/autorización según decisión con los interesados | A |
+| # | ID | Área | Tarea | Esfuerzo | Estado |
+|---|----|------|-------|----------|--------|
+| 31 | E3 | Backend | Introducir DTOs para las respuestas de la API, desacoplando los modelos de BD del contrato público | M | ✓ |
+| 32 | E4 | Backend | Agregar logging con `ILogger` en operaciones críticas: creación, cancelaciones, bloqueos y ausencias | B | ✓ |
+| 33 | E5 | Ambos | Incorporar tests unitarios para servicios y tests de integración para los endpoints principales | A | Pendiente |
+| 34 | E1 | Ambos | Evaluar e implementar autenticación/autorización según decisión con los interesados | A | Pendiente |
 
 ---
 
@@ -141,5 +141,5 @@
 | 2 | `feature/politica-noshow` | 10 | ✓ Completa | Medio |
 | 3 | `feature/mejoras-seguridad-logica` | 4 | ✓ Completa | Bajo |
 | 4 | `feature/validaciones-ux` | 5 (28/29 postergados) | ✓ Completa | Medio |
-| 5 | `feature/arquitectura-calidad` | 4 | Pendiente | Alto |
+| 5 | `feature/arquitectura-calidad` | 4 | En curso (E3✓ E4✓ / E5 E1 pendientes) | Alto |
 | **Total** | | **40** | | |
