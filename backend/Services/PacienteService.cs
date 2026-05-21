@@ -28,8 +28,8 @@ public class PacienteService : IPacienteService
 
     public async Task<Paciente> CreateAsync(Paciente paciente)
     {
-        paciente.createdAt = DateTime.UtcNow;
-        paciente.isActive = true;
+        paciente.CreatedAt = DateTime.UtcNow;
+        paciente.IsActive = true;
         _context.Pacientes.Add(paciente);
         await _context.SaveChangesAsync();
         return paciente;
