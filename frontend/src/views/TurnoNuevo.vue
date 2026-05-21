@@ -55,8 +55,8 @@ export default {
       const [pRes, mRes] = await Promise.all([pacientesApi.getAll(), medicosApi.getAll()])
       this.pacientes = pRes.data
       this.medicos = mRes.data
-    } catch {
-      alert('Error al procesar la solicitud')
+    } catch (err) {
+      alert(err.response?.data?.mensaje || 'Error al cargar los datos.')
     }
   },
   methods: {
