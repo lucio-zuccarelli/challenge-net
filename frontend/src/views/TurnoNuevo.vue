@@ -55,12 +55,17 @@ export default {
       const [pRes, mRes] = await Promise.all([pacientesApi.getAll(), medicosApi.getAll()])
       this.pacientes = pRes.data
       this.medicos = mRes.data
-    } catch {
-      alert('Error al procesar la solicitud')
+    } catch (err) {
+      alert(err.response?.data?.mensaje || 'Error al cargar los datos.')
     }
   },
   methods: {
     async guardar() {
+      if (!this.form.pacienteId) return alert('Seleccioná un paciente.')
+      if (!this.form.medicoId) return alert('Seleccioná un médico.')
+      if (!this.form.fechaHora) return alert('Ingresá la fecha y hora del turno.')
+      if (new Date(this.form.fechaHora) <= new Date()) return alert('La fecha del turno debe ser futura.')
+      if (!this.form.motivo.trim()) return alert('Ingresá el motivo de la consulta.')
       try {
         await turnosApi.create({
           pacienteId: Number(this.form.pacienteId),

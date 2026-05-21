@@ -28,8 +28,13 @@ public class PacienteService : IPacienteService
 
     public async Task<Paciente> CreateAsync(Paciente paciente)
     {
-        paciente.createdAt = DateTime.UtcNow;
-        paciente.isActive = true;
+        if (string.IsNullOrWhiteSpace(paciente.NombreCompleto))
+            throw new ArgumentException("El nombre completo es requerido.");
+        if (string.IsNullOrWhiteSpace(paciente.DNI))
+            throw new ArgumentException("El DNI es requerido.");
+
+        paciente.CreatedAt = DateTime.UtcNow;
+        paciente.IsActive = true;
         _context.Pacientes.Add(paciente);
         await _context.SaveChangesAsync();
         return paciente;
@@ -37,6 +42,11 @@ public class PacienteService : IPacienteService
 
     public async Task<Paciente> UpdateAsync(int id, Paciente paciente)
     {
+        if (string.IsNullOrWhiteSpace(paciente.NombreCompleto))
+            throw new ArgumentException("El nombre completo es requerido.");
+        if (string.IsNullOrWhiteSpace(paciente.DNI))
+            throw new ArgumentException("El DNI es requerido.");
+
         var existing = await _context.Pacientes.FindAsync(id);
         if (existing == null)
             throw new KeyNotFoundException($"Paciente {id} no encontrado.");

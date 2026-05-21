@@ -48,8 +48,8 @@ export default {
       const res = await turnosApi.getById(this.$route.params.id)
       this.turno = res.data
       this.nuevoEstado = this.turno.estado
-    } catch {
-      alert('Error al procesar la solicitud')
+    } catch (err) {
+      alert(err.response?.data?.mensaje || 'Error al cargar el turno.')
     }
   },
   methods: {

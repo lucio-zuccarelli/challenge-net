@@ -41,8 +41,15 @@ public class PacientesController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] Paciente paciente)
     {
-        var creado = await _pacienteService.CreateAsync(paciente);
-        return CreatedAtAction(nameof(GetById), new { id = creado.Id }, creado);
+        try
+        {
+            var creado = await _pacienteService.CreateAsync(paciente);
+            return CreatedAtAction(nameof(GetById), new { id = creado.Id }, creado);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { mensaje = ex.Message });
+        }
     }
 
     [HttpPut("{id}")]
@@ -56,6 +63,10 @@ public class PacientesController : ControllerBase
         catch (KeyNotFoundException ex)
         {
             return NotFound(new { mensaje = ex.Message });
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { mensaje = ex.Message });
         }
     }
 

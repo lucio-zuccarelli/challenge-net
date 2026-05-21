@@ -50,8 +50,8 @@ export default {
     try {
       const res = await turnosApi.getAll()
       this.turnos = res.data
-    } catch {
-      alert('Error al procesar la solicitud')
+    } catch (err) {
+      alert(err.response?.data?.mensaje || 'Error al cargar los turnos.')
     }
   },
   methods: {
