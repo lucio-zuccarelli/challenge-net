@@ -52,6 +52,10 @@ public class TurnosController : ControllerBase
         {
             return BadRequest(new { mensaje = ex.Message });
         }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { mensaje = ex.Message });
+        }
     }
 
     // B3: cambiado de [HttpGet("cancelar/{id}")] a [HttpPost("{id}/cancelar")]

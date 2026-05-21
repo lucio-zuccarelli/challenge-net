@@ -36,6 +36,15 @@ public class TurnoService : ITurnoService
 
     public async Task<Turno> CrearTurnoAsync(Turno turno)
     {
+        if (turno.PacienteId == null || turno.PacienteId == 0)
+            throw new ArgumentException("El paciente es requerido.");
+        if (turno.MedicoId == 0)
+            throw new ArgumentException("El médico es requerido.");
+        if (string.IsNullOrWhiteSpace(turno.Motivo))
+            throw new ArgumentException("El motivo es requerido.");
+        if (turno.FechaHora <= DateTime.UtcNow)
+            throw new ArgumentException("La fecha del turno debe ser futura.");
+
         var paciente = await _context.Pacientes.FindAsync(turno.PacienteId);
         if (paciente == null)
             throw new KeyNotFoundException("Paciente no encontrado.");
