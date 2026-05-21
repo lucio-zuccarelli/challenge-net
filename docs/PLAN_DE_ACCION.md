@@ -91,12 +91,12 @@
 
 **Rama:** `feature/mejoras-seguridad-logica`
 
-| # | ID | Área | Tarea | Esfuerzo |
-|---|----|------|-------|----------|
-| 20 | B1 | Backend | Restringir CORS en `Program.cs` a orígenes específicos (reemplazar `AllowAnyOrigin`) | MB |
-| 21 | F1 | Frontend | Reemplazar URL hardcodeada en `api.js` por `import.meta.env.VITE_API_BASE_URL`. Crear `.env.development` y `.env.production` | MB |
-| 22 | B4 | Backend | Implementar máquina de estados en `TurnoService.ActualizarEstado`: definir transiciones válidas por estado y rechazar las inválidas | B |
-| 23 | B6 | Backend | `PacienteService.Delete`: verificar que el paciente no tenga turnos activos antes de eliminar; retornar error descriptivo si los tiene | B |
+| # | ID | Área | Tarea | Esfuerzo | Estado |
+|---|----|------|-------|----------|--------|
+| 20 | B1 | Backend | Restringir CORS en `Program.cs` a orígenes específicos (reemplazar `AllowAnyOrigin`) | MB | ✓ |
+| 21 | F1 | Frontend | Reemplazar URL hardcodeada en `api.js` por `import.meta.env.VITE_API_BASE_URL`. `.env.example` como referencia; archivos reales en `.gitignore` | MB | ✓ |
+| 22 | B4 | Backend | Implementar máquina de estados en `TurnoService.ActualizarEstado`: definir transiciones válidas por estado y rechazar las inválidas | B | ✓ |
+| 23 | B6 | Backend | `PacienteService.Delete`: verificar que el paciente no tenga turnos activos antes de eliminar; retornar error descriptivo si los tiene | B | ✓ |
 
 ---
 
@@ -106,15 +106,15 @@
 
 **Rama:** `feature/validaciones-ux`
 
-| # | ID | Área | Tarea | Esfuerzo |
-|---|----|------|-------|----------|
-| 24 | B8 | Backend | Validaciones en `CrearTurno`: fecha no puede ser pasada, campos requeridos no vacíos. Ídem en `Create` y `Update` de pacientes | B |
-| 25 | F7 | Frontend | Validar campos requeridos en `TurnoNuevo.vue` antes de enviar | B |
-| 26 | F8 | Frontend | Reemplazar mensajes genéricos de error en todos los `.vue` por el detalle devuelto por la API | B |
-| 27 | B10 | Backend | Condicionar Swagger a entorno de desarrollo en `Program.cs` | MB |
-| 28 | B9 | Backend | Implementar CRUD completo para médicos en `MedicosController` (`POST`, `PUT`, `DELETE`) | M |
-| 29 | B7 | Backend | Agregar paginación a `GET /turnos` y `GET /pacientes` (`?page` y `?pageSize`) y adaptar el frontend | M |
-| 30 | B11 | Backend | Renombrar `createdAt` → `CreatedAt` e `isActive` → `IsActive` en `Paciente.cs` y actualizar referencias | MB |
+| # | ID | Área | Tarea | Esfuerzo | Estado |
+|---|----|------|-------|----------|--------|
+| 24 | B8 | Backend | Validaciones en `CrearTurno`: fecha no puede ser pasada, campos requeridos no vacíos. Ídem en `Create` y `Update` de pacientes | B | ✓ |
+| 25 | F7 | Frontend | Validar campos requeridos en `TurnoNuevo.vue` antes de enviar | B | ✓ |
+| 26 | F8 | Frontend | Reemplazar mensajes genéricos de error en todos los `.vue` por el detalle devuelto por la API | B | ✓ |
+| 27 | B10 | Backend | Condicionar Swagger a entorno de desarrollo en `Program.cs` | MB | ✓ |
+| 28 | B9 | Backend | Implementar CRUD completo para médicos en `MedicosController` (`POST`, `PUT`, `DELETE`) | M | Postergado |
+| 29 | B7 | Backend | Agregar paginación a `GET /turnos` y `GET /pacientes` (`?page` y `?pageSize`) y adaptar el frontend | M | Postergado |
+| 30 | B11 | Backend | Renombrar `createdAt` → `CreatedAt` e `isActive` → `IsActive` en `Paciente.cs` y actualizar referencias | MB | ✓ |
 
 ---
 
@@ -139,7 +139,7 @@
 |------|------|-------|--------|------------------------|
 | 1 | `fix/bugs-criticos-capa-servicios` | 15 | ✓ Completa | Medio-Alto |
 | 2 | `feature/politica-noshow` | 10 | ✓ Completa | Medio |
-| 3 | `feature/mejoras-seguridad-logica` | 4 | Pendiente | Bajo |
-| 4 | `feature/validaciones-ux` | 7 | Pendiente | Medio |
+| 3 | `feature/mejoras-seguridad-logica` | 4 | ✓ Completa | Bajo |
+| 4 | `feature/validaciones-ux` | 5 (28/29 postergados) | ✓ Completa | Medio |
 | 5 | `feature/arquitectura-calidad` | 4 | Pendiente | Alto |
 | **Total** | | **40** | | |
